@@ -1,0 +1,6 @@
+{
+  "greeting": "samples/greeting.mp3",
+  "farewell": "samples/farewell.mp3",
+  "goodbye": "samples/goodbye.mp3",
+  "no_input": "samples/no_input.mp3"
+}

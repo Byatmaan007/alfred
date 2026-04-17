@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m pip install -r requirements.txt)",
+      "Bash(/c/Users/shrey/AppData/Local/Programs/Python/Python313/python.exe -m pip install -r requirements.txt)",
+      "Bash(/c/Users/shrey/AppData/Local/Programs/Python/Python313/python.exe main.py)",
+      "Bash(py:*)",
+      "WebSearch",
+      "WebFetch(domain:huntraders.com)",
+      "WebFetch(domain:www.earnforex.com)",
+      "WebFetch(domain:archive.org)",
+      "Bash(curl -L -o \"01_Reminiscences_of_a_Stock_Operator.pdf\" \"https://www.earnforex.com/forex-e-books/forex-market/jesse_livermore.pdf\" --max-time 30 -s -w \"%{http_code} %{size_download}B\\\\n\")",
+      "Bash(curl -L -o \"02_Original_Turtle_Trading_Rules.pdf\" \"https://www.earnforex.com/forex-e-books/beginner-forex-trading/turtlerules.pdf\" --max-time 30 -s -w \"%{http_code} %{size_download}B\\\\n\")",
+      "Bash(curl -L -o \"03_Leveraged_Trading_Robert_Carver.pdf\" \"https://www.earnforex.com/forex-e-books/beginner-forex-trading/Leveraged_Trading_Robert_Carver.pdf\" --max-time 30 -s -w \"%{http_code} %{size_download}B\\\\n\")",
+      "Bash(curl -L -o \"04_What_Moves_the_Currency_Market_Kathy_Lien.pdf\" \"https://www.earnforex.com/forex-e-books/forex-market/What_moves_the_currency_market.pdf\" --max-time 30 -s -w \"%{http_code} %{size_download}B\\\\n\")",
+      "Bash(curl -L -o \"05_Phantom_of_the_Pits.pdf\" \"https://www.earnforex.com/forex-e-books/forex-market/phantom_of_the_pits.pdf\" --max-time 30 -s -w \"%{http_code} %{size_download}B\\\\n\")",
+      "mcp__mcp-obsidian__obsidian_put_content",
+      "mcp__mcp-obsidian__obsidian_list_files_in_dir",
+      "mcp__mcp-obsidian__obsidian_delete_file"
+    ]
+  }
+}

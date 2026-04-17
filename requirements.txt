@@ -1,0 +1,11 @@
+anthropic
+rich
+openai-whisper
+edge-tts
+pygame
+python-dotenv
+sounddevice
+numpy
+scipy
+requests
+urllib3
