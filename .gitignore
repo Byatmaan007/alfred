@@ -1,4 +1,5 @@
 .env
+main.enc
 __pycache__/
 *.pyc
 *.pyo

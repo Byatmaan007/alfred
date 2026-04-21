@@ -208,6 +208,85 @@ def analyze_chart(focus: str = "") -> list:
         return [{"type": "text", "text": f"Chart analysis failed: {e}"}]
 
 
+def open_pine_editor() -> str:
+    """Open the Pine Script editor panel in TradingView."""
+    try:
+        _focus_chart()
+        # Alt+P opens Pine Editor on TradingView (works when chart is focused)
+        pyautogui.hotkey("alt", "p")
+        time.sleep(1.2)
+        return "Pine Editor opened."
+    except Exception as e:
+        return f"Failed to open Pine Editor: {e}"
+
+
+def write_pine_script(code: str) -> str:
+    """Clear the Pine Editor and paste new Pine Script code."""
+    try:
+        # Click inside the editor area — roughly bottom third of screen
+        w, h = pyautogui.size()
+        pyautogui.click(w // 2, int(h * 0.75))
+        time.sleep(0.4)
+
+        # Select all existing code and replace it
+        pyautogui.hotkey("ctrl", "a")
+        time.sleep(0.2)
+
+        # Use clipboard for reliable paste of multi-line code
+        import subprocess
+        subprocess.run(
+            ["clip"],
+            input=code.encode("utf-16"),
+            check=True,
+            shell=True,
+        )
+        pyautogui.hotkey("ctrl", "v")
+        time.sleep(0.5)
+        return "Pine Script written to editor."
+    except Exception as e:
+        return f"Failed to write Pine Script: {e}"
+
+
+def add_to_chart() -> str:
+    """Compile and add the current Pine Script to the chart (Add to chart button)."""
+    try:
+        # Alt+Enter submits / adds to chart in TradingView Pine Editor
+        pyautogui.hotkey("alt", "Return")
+        time.sleep(1.5)
+        return "Script added to chart."
+    except Exception as e:
+        return f"Failed to add script to chart: {e}"
+
+
+def load_pine_file(file_path: str) -> str:
+    """Read a .pine file from disk and load it into the Pine Editor."""
+    try:
+        path = os.path.expanduser(file_path.strip())
+        if not os.path.exists(path):
+            # Try relative to Downloads
+            alt = os.path.join(os.path.expanduser("~"), "Downloads", file_path.strip())
+            if os.path.exists(alt):
+                path = alt
+            else:
+                return f"File not found: {file_path}"
+        with open(path, "r", encoding="utf-8") as f:
+            code = f.read()
+        result = write_pine_script(code)
+        return f"Loaded {os.path.basename(path)} into Pine Editor. {result}"
+    except Exception as e:
+        return f"Failed to load Pine file: {e}"
+
+
+def close_pine_editor() -> str:
+    """Close / hide the Pine Editor panel."""
+    try:
+        pyautogui.hotkey("alt", "p")
+        time.sleep(0.5)
+        return "Pine Editor closed."
+    except Exception as e:
+        return f"Failed to close Pine Editor: {e}"
+
+
 def scroll_chart(direction: str) -> str:
     """Scroll the chart left (back in time) or right (forward)."""
     try:
@@ -245,7 +324,8 @@ TRADINGVIEW_TOOL = {
         "properties": {
             "action": {
                 "type": "string",
-                "enum": ["open", "set_symbol", "set_timeframe", "screenshot", "zoom", "scroll", "analyze"],
+                "enum": ["open", "set_symbol", "set_timeframe", "screenshot", "zoom", "scroll", "analyze",
+                         "open_pine_editor", "write_pine_script", "load_pine_file", "add_to_chart", "close_pine_editor"],
                 "description": "The action to perform on TradingView.",
             },
             "symbol": {
@@ -267,6 +347,14 @@ TRADINGVIEW_TOOL = {
             "focus": {
                 "type": "string",
                 "description": "What to focus on during analysis, e.g. 'RSI and MACD signals', 'support resistance levels', 'trend direction'. Optional for analyze action.",
+            },
+            "code": {
+                "type": "string",
+                "description": "Pine Script v5 source code to write into the editor. Required for write_pine_script.",
+            },
+            "file_path": {
+                "type": "string",
+                "description": "Path to a .pine file to load into the editor. Can be absolute or relative to ~/Downloads. Required for load_pine_file.",
             },
         },
         "required": ["action"],
@@ -314,6 +402,27 @@ def execute(tool_name: str, tool_input: dict) -> str:
     elif action == "analyze":
         focus = tool_input.get("focus", "")
         return analyze_chart(focus)  # returns list of content blocks
+
+    elif action == "open_pine_editor":
+        return open_pine_editor()
+
+    elif action == "write_pine_script":
+        code = tool_input.get("code", "")
+        if not code:
+            return "Please provide Pine Script code."
+        return write_pine_script(code)
+
+    elif action == "load_pine_file":
+        file_path = tool_input.get("file_path", "")
+        if not file_path:
+            return "Please provide a file path."
+        return load_pine_file(file_path)
+
+    elif action == "add_to_chart":
+        return add_to_chart()
+
+    elif action == "close_pine_editor":
+        return close_pine_editor()
 
     else:
         return f"Unknown TradingView action: {action}"
