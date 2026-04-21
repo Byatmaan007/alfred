@@ -27,7 +27,7 @@ from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
-from tools import obsidian, tradingview, alfred_control
+from tools import obsidian, tradingview, alfred_control, fred, tv
 from agents import memory_agent
 from memory import session
 from ui import halo, C_WHITE, C_MUTED, C_ACCENT, C_BORDER, C_SCAN, C_HOT
@@ -113,10 +113,27 @@ Use tradingview_control when the user asks to:
 - Take a screenshot, zoom, or scroll the chart
 - Analyze the chart — use action "analyze" and pass a "focus" if the user mentions specific indicators
   (e.g. "what does RSI say" → focus: "RSI", "analyze my indicators" → no focus needed)
+- Write or run Pine Script — use the Pine Editor actions:
+  - "open_pine_editor" — open the editor panel (Alt+P)
+  - "write_pine_script" — paste code into the editor (provide "code" param with full Pine Script)
+  - "add_to_chart" — compile and add the script to the chart (Alt+Enter)
+  - "close_pine_editor" — hide the editor panel
+  For Pine Script requests, always chain: open_pine_editor → write_pine_script → add_to_chart.
+  Generate valid Pine Script v5. Include //@version=5 at the top.
 Act immediately — no confirmation needed. Describe what you see in the chart conversationally.
 
 ## When to use alfred_set_voice
 Use alfred_set_voice immediately when Shrey says things like "change your voice", "switch to X accent", "speak in X", "use X voice". Map natural language to the closest edge-tts voice name and call the tool — no confirmation needed.
+
+## When to use TV Control
+Use tv_control when Shrey says anything about the TV — mute, volume, channel, power, opening Netflix/YouTube/Prime, navigating menus, or changing inputs.
+- Run `discover` first if TV_IP isn't set yet (finds Roku automatically).
+- Run `status` if Shrey asks what TV is configured.
+- Always act immediately — no confirmation needed.
+- For Android TV: ensure ADB is connected (`connect` action) before sending keys.
+
+## When to use FRED
+Use fred_data for US macroeconomic indicators: GDP, unemployment (UNRATE), inflation (CPIAUCSL), Fed funds rate (FEDFUNDS), Treasury yields (DGS10, DGS2), S&P 500 (SP500), housing starts (HOUST). If you don't know the series ID, use action "search_series" first.
 
 ## When to use web search
 Use for anything time-sensitive: news, prices, weather, recent events, documentation.
@@ -129,7 +146,7 @@ Use for anything time-sensitive: news, prices, weather, recent events, documenta
 - Lead with the answer, add context after if needed"""
 
 # ── All client-side tool name sets ────────────────────────────────────────────
-_CLIENT_TOOLS = obsidian.TOOL_NAMES | tradingview.TOOL_NAMES | memory_agent.TOOL_NAMES | alfred_control.TOOL_NAMES
+_CLIENT_TOOLS = obsidian.TOOL_NAMES | tradingview.TOOL_NAMES | memory_agent.TOOL_NAMES | alfred_control.TOOL_NAMES | fred.TOOL_NAMES | tv.TOOL_NAMES
 
 # ── Tool registry ──────────────────────────────────────────────────────────────
 _TOOLS = [
@@ -138,6 +155,8 @@ _TOOLS = [
     *tradingview.ALL_TOOLS,
     *memory_agent.TOOLS,
     *alfred_control.TOOLS,
+    *fred.ALL_TOOLS,
+    *tv.ALL_TOOLS,
 ]
 
 # ── Conversation history (loaded from disk on first import) ───────────────────
@@ -177,6 +196,10 @@ def _dispatch(tool_name: str, tool_input: dict) -> str | list:
         return memory_agent.execute(tool_name, tool_input)
     if tool_name in alfred_control.TOOL_NAMES:
         return alfred_control.execute(tool_name, tool_input)
+    if tool_name in fred.TOOL_NAMES:
+        return fred.execute(tool_name, tool_input)
+    if tool_name in tv.TOOL_NAMES:
+        return tv.execute(tool_name, tool_input)
     return f"Unknown tool: {tool_name}"
 
 
